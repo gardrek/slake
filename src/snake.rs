@@ -19,7 +19,9 @@ pub enum Direction {
 }
 
 impl Default for Direction {
-    fn default() -> Self { Direction::Left }
+    fn default() -> Self {
+        Direction::Left
+    }
 }
 
 impl Direction {
@@ -55,8 +57,8 @@ pub struct SnakeGame {
     pub hazards: Vec<Vector>,
     pub food: Vector,
     game_over: bool,
-    score: usize,
-    high_score: usize,
+    pub score: usize,
+    pub high_score: usize,
 }
 
 impl SnakeGame {
@@ -64,7 +66,7 @@ impl SnakeGame {
         assert!(width >= 5);
         assert!(height >= 3);
 
-        let mut game = SnakeGame{
+        let mut game = SnakeGame {
             width,
             height,
             ..SnakeGame::default()
@@ -80,20 +82,20 @@ impl SnakeGame {
         let height = self.height;
 
         let head = Vector(width - 2, height / 2);
-        let tail = Vector(width - 1, height / 2);
 
         let mut snake = VecDeque::with_capacity((width * height).try_into().unwrap());
 
         snake.push_front(head);
-        snake.push_back(tail);
 
         self.snake = snake;
+        self.hazards = vec![];
+
+        self.add_food();
+
         self.direction = Direction::Left;
         self.next_direction = Direction::Left;
-        self.food = Vector(width / 2, height / 2);
-        self.hazards = vec![];
         self.game_over = false;
-        self.score = 1;
+        self.score = 0;
     }
 
     pub fn change_direction(&mut self, direction: Direction) {
@@ -115,9 +117,6 @@ impl SnakeGame {
 
         self.direction = self.next_direction.clone();
 
-        // assume snake length is at least 2 to avoid weird edge cases we don't need
-        assert!(self.snake.len() >= 2);
-
         // get new head position
         let new_head = {
             let old_head = self.snake.get(0).unwrap();
@@ -133,43 +132,49 @@ impl SnakeGame {
             return;
         }
 
-        let tail_pos = self.snake.back().unwrap().clone();
+        // add new head
+        self.snake.push_front(new_head.clone());
 
         // check for eating
         if new_head == self.food {
             self.score += 1;
-            
-            self.hazards.push(tail_pos);
 
-            let free_positions = (0..self.height)
-                .flat_map(|y| (0..self.width).map(move |x| Vector(x, y)))
-                .filter(|pos| !self.snake.contains(pos) && !self.hazards.contains(pos))
-                .collect::<Vec<_>>();
+            let tail_pos = self.snake.back().unwrap();
 
-            if free_positions.is_empty() {
-                self.end_game();
-            } else {
-                let position_index = random::get_u16() as usize % free_positions.len() as usize;
+            self.hazards.push(tail_pos.clone());
 
-                self.food = free_positions[position_index].clone();
-            }
+            self.add_food();
         } else {
             // remove tail if only if not eating; in other words, we grow if we eat
             self.snake.pop_back().unwrap();
         }
-
-        // add new head
-        self.snake.push_front(new_head);
     }
 
-    pub fn end_game(&mut self) {
+    fn add_food(&mut self) {
+        let free_positions = (0..self.height)
+            .flat_map(|y| (0..self.width).map(move |x| Vector(x, y)))
+            .filter(|pos| !self.snake.contains(pos) && !self.hazards.contains(pos))
+            .collect::<Vec<_>>();
+
+        if free_positions.is_empty() {
+            self.end_game();
+        } else {
+            let position_index = random::get_u16() as usize % free_positions.len() as usize;
+
+            self.food = free_positions[position_index].clone();
+        }
+    }
+
+    fn end_game(&mut self) {
         self.game_over = true;
 
         if self.score >= self.high_score {
             self.high_score = self.score;
         }
-        
-        crate::log(&format!("Score: {} / High Score: {}", self.score, self.high_score));
+
+        let score_text = format!("Score: {} / High Score: {}", self.score, self.high_score);
+
+        crate::log(&score_text);
     }
 }
 

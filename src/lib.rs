@@ -12,7 +12,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{console, window, HtmlDivElement, HtmlElement, KeyboardEvent};
 
 thread_local! {
-    static GAME: Rc<RefCell<SnakeGame>> = Rc::new(RefCell::new(SnakeGame::new(20, 16)));
+    static GAME: Rc<RefCell<SnakeGame>> = Rc::new(RefCell::new(SnakeGame::new(21, 15)));
 
     static TICK_CLOSURE: Closure<dyn FnMut()> = Closure::wrap(Box::new({
         || {
@@ -67,6 +67,9 @@ pub fn main() {
 }
 
 fn render() -> Result<(), JsValue> {
+    let height = GAME.with(|game| game.borrow().height);
+    let width = GAME.with(|game| game.borrow().width);
+
     let document = window().unwrap_throw().document().unwrap_throw();
 
     let root_container = document
@@ -74,15 +77,23 @@ fn render() -> Result<(), JsValue> {
         .unwrap_throw() // we unwrap this one because it's actually an option so, it's easier to just throw here
         .dyn_into::<HtmlElement>()?;
 
-    let height = GAME.with(|game| game.borrow().height);
-    let width = GAME.with(|game| game.borrow().width);
-
     root_container.set_inner_html("");
 
-    root_container
+    let field_holder_element = document
+        .create_element("div")?
+        .dyn_into::<HtmlDivElement>()?;
+
+    field_holder_element.set_class_name("field_holder");
+
+    field_holder_element.set_inner_text("");
+
+    root_container.append_child(&field_holder_element)?;
+
+    field_holder_element
         .style()
         .set_property("display", "inline-grid")?;
-    root_container.style().set_property(
+
+    field_holder_element.style().set_property(
         "grid-template",
         &format!("repeat({height}, auto) / repeat({width}, auto)"),
     )?;
@@ -113,9 +124,44 @@ fn render() -> Result<(), JsValue> {
                 });
             });
 
-            root_container.append_child(&field_element)?;
+            field_holder_element.append_child(&field_element)?;
         }
     }
+
+    //~ document.create_element("FOOTER");
+
+    let info_element = document
+        .create_element("div")?
+        .dyn_into::<HtmlDivElement>()?;
+
+    info_element.set_class_name("info");
+
+    //~ info_element
+    //~ .style()
+    //~ .set_property("display", "inline-grid")?;
+
+    //~ info_element.style().set_property(
+    //~ "grid-template",
+    //~ &format!("repeat(1, auto) / repeat(2, auto)"),
+    //~ )?;
+
+    let score_element = document
+        .create_element("div")?
+        .dyn_into::<HtmlDivElement>()?;
+
+    let high_score_element = document
+        .create_element("div")?
+        .dyn_into::<HtmlDivElement>()?;
+
+    GAME.with(|game| {
+        score_element.set_inner_text(&format!("🍆 {}", game.borrow().score));
+        high_score_element.set_inner_text(&format!("⭐ {}", game.borrow().high_score));
+    });
+
+    info_element.append_child(&score_element)?;
+    info_element.append_child(&high_score_element)?;
+
+    root_container.append_child(&info_element)?;
 
     Ok(())
 }
@@ -127,4 +173,9 @@ extern "C" {
 
     #[wasm_bindgen(js_namespace = console)]
     fn log(s: &str);
+}
+
+#[wasm_bindgen]
+extern "C" {
+    fn alert(s: &str);
 }
