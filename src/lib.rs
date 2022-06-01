@@ -41,12 +41,6 @@ thread_local! {
     }) as Box<dyn FnMut(KeyboardEvent)>);
 }
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = Math)]
-    fn random() -> f64;
-}
-
 #[wasm_bindgen(start)]
 pub fn main() {
     console::log_1(&"Starting...".into());
@@ -124,4 +118,13 @@ fn render() -> Result<(), JsValue> {
     }
 
     Ok(())
+}
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = Math)]
+    fn random() -> f64;
+
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
 }
