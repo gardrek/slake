@@ -12,7 +12,7 @@ use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{console, window, HtmlDivElement, HtmlElement, KeyboardEvent};
 
 thread_local! {
-    static GAME: Rc<RefCell<SnakeGame>> = Rc::new(RefCell::new(SnakeGame::new(24, 20)));
+    static GAME: Rc<RefCell<SnakeGame>> = Rc::new(RefCell::new(SnakeGame::new(20, 16)));
 
     static TICK_CLOSURE: Closure<dyn FnMut()> = Closure::wrap(Box::new({
         || {
