@@ -106,7 +106,10 @@ impl SnakeGame {
             self.direction.to_vector().add(old_head)
         };
 
-        if !self.is_within_board(&new_head) || self.snake.contains(&new_head) || self.hazards.contains(&new_head) {
+        if !self.is_within_board(&new_head)
+            || self.snake.contains(&new_head)
+            || self.hazards.contains(&new_head)
+        {
             self.game_over = true;
             return;
         }
@@ -116,7 +119,7 @@ impl SnakeGame {
         // check for eating
         if new_head == self.food {
             self.hazards.push(tail_pos);
-        
+
             let free_positions = (0..self.height)
                 .flat_map(|y| (0..self.width).map(move |x| Vector(x, y)))
                 .filter(|pos| !self.snake.contains(pos) && !self.hazards.contains(pos))

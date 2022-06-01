@@ -1,9 +1,9 @@
 mod random;
 mod snake;
 
+use crate::snake::Direction;
 use crate::snake::SnakeGame;
 use crate::snake::Vector;
-use crate::snake::Direction;
 
 use js_sys::Function;
 use std::cell::RefCell;
