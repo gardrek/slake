@@ -77,6 +77,26 @@ impl SnakeGame {
         }
     }
 
+    pub fn restart(&mut self) {
+        let width = self.width;
+        let height = self.height;
+
+        let head = Vector(width - 2, height / 2);
+        let tail = Vector(width - 1, height / 2);
+
+        let mut snake = VecDeque::with_capacity((width * height).try_into().unwrap());
+
+        snake.push_front(head);
+        snake.push_back(tail);
+
+        self.snake = snake;
+        self.direction = Direction::Left;
+        self.next_direction = Direction::Left;
+        self.food = Vector(width / 2, height / 2);
+        self.hazards = vec![];
+        self.game_over = false;
+    }
+
     pub fn change_direction(&mut self, direction: Direction) {
         if self.direction == direction || self.direction.opposite() == direction {
             return;

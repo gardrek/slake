@@ -23,13 +23,20 @@ thread_local! {
 
     static HANDLE_KEYDOWN: Closure<dyn FnMut(KeyboardEvent)> = Closure::wrap(Box::new({
         |event: KeyboardEvent| {
-            GAME.with(|game| game.borrow_mut().change_direction(match &event.key()[..] {
+            let direction = match &event.key()[..] {
                 "ArrowUp" => Direction::Up,
                 "ArrowDown" => Direction::Down,
                 "ArrowLeft" => Direction::Left,
                 "ArrowRight" => Direction::Right,
+                " " => {
+                    GAME.with(|game| game.borrow_mut().restart());
+                    event.prevent_default();
+                    return;
+                },
                 _ => return,
-            }));
+            };
+            GAME.with(|game| game.borrow_mut().change_direction(direction));
+            event.prevent_default();
         }
     }) as Box<dyn FnMut(KeyboardEvent)>);
 }
