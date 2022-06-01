@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name='viewport' content='width=device-width, initial-scale=1' />
+    <title>Snacky</title>
+    <style>
+        body {
+            font-size: 200%;
+            font-family: sans-serif;
+            text-align: center;
+        }
+
+        #root {
+            border: 2px solid grey;
+        }
+        
+        .field {
+            text-decoration: none;
+            text-align: center;
+            width: 2.5rem;
+            height: 2.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script type="module">
+      import init from "./pkg/snake.js";
+
+      async function run() {
+        await init();
+      }
+
+      run();
+    </script>
+</body>
+</html>

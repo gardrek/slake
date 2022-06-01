@@ -1,0 +1,20 @@
+[package]
+name = "snake"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+prng = { path = "../../lib/prng" }
+wasm-bindgen = "0.2.80"
+js-sys = "0.3.57"
+
+[dependencies.web-sys]
+version = "0.3.57"
+features = [
+    "console", "CssStyleDeclaration", "Document", "Element", "HtmlElement", "HtmlDivElement", "KeyboardEvent", "Window"
+]
