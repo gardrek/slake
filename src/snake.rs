@@ -109,6 +109,9 @@ impl SnakeGame {
 
         self.clear_board();
 
+        let tail = Vector(width - 1, height / 2);
+        self.push_snake_head(tail);
+
         let head = Vector(width - 2, height / 2);
         self.push_snake_head(head);
 
@@ -177,8 +180,8 @@ impl SnakeGame {
         let new_head = {
             let old_head = self.snake.get(0).unwrap();
 
-            //~ self.direction.to_vector().add(old_head)
             &self.direction.to_vector() + old_head
+            
         };
 
         if !self.is_within_board(&new_head) {

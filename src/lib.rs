@@ -12,13 +12,12 @@ use wasm_bindgen::{prelude::*, JsCast};
 use web_sys::{console, window, HtmlDivElement, HtmlElement, KeyboardEvent};
 
 thread_local! {
-    //~ static GAME: Rc<RefCell<SnakeGame>> = Rc::new(RefCell::new(SnakeGame::new(5, 3)));
     static GAME: Rc<RefCell<SnakeGame>> = Rc::new(RefCell::new(SnakeGame::new(21, 15)));
 
     static TICK_CLOSURE: Closure<dyn FnMut()> = Closure::wrap(Box::new({
         || {
             GAME.with(|game| game.borrow_mut().tick());
-            render().unwrap_throw();
+            render(false).unwrap_throw();
         }
     }) as Box<dyn FnMut()>);
 
@@ -67,7 +66,7 @@ pub fn main() {
     });
 }
 
-fn render() -> Result<(), JsValue> {
+fn render(debug_mode: bool) -> Result<(), JsValue> {
     let height = GAME.with(|game| game.borrow().height);
     let width = GAME.with(|game| game.borrow().width);
 
@@ -99,7 +98,11 @@ fn render() -> Result<(), JsValue> {
         &format!("repeat({height}, auto) / repeat({width}, auto)"),
     )?;
 
-    let semi_open_tiles = GAME.with(|game| game.borrow().get_semi_open_tiles());
+    let semi_open_tiles = if debug_mode {
+        Some(GAME.with(|game| game.borrow().get_semi_open_tiles()))
+    } else {
+        None
+    };
 
     for y in 0..height {
         for x in 0..width {
@@ -112,21 +115,21 @@ fn render() -> Result<(), JsValue> {
             field_element.set_class_name("field");
 
             GAME.with(|game| {
-                /*
-                if semi_open_tiles.contains(&pos) {
-                    field_element
-                        .style()
-                        .set_property("background-color", "grey")
-                        .unwrap_throw();
-                }
+                if debug_mode {
+                    if semi_open_tiles.as_ref().unwrap().contains(&pos) {
+                        field_element
+                            .style()
+                            .set_property("background-color", "grey")
+                            .unwrap_throw();
+                    }
 
-                if !game.borrow().free_positions.contains(&pos) {
-                    field_element
-                        .style()
-                        .set_property("background-color", "orange")
-                        .unwrap_throw();
+                    if !game.borrow().free_positions.contains(&pos) {
+                        field_element
+                            .style()
+                            .set_property("background-color", "orange")
+                            .unwrap_throw();
+                    }
                 }
-                */
 
                 field_element.set_inner_text(if game.borrow().food.contains(&pos) {
                     "🍆"
