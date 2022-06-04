@@ -181,7 +181,6 @@ impl SnakeGame {
             let old_head = self.snake.get(0).unwrap();
 
             &self.direction.to_vector() + old_head
-            
         };
 
         if !self.is_within_board(&new_head) {
